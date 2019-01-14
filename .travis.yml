@@ -1,0 +1,42 @@
+os: linux
+dist: xenial
+sudo: required
+git:
+  depth: 3
+addons:
+  apt:
+    update:
+    - true
+before_install:
+  - git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9 ~/toolchain/
+  - sudo chmod -R a+x ~/toolchain/*
+install: true
+script:
+  - export CROSS_COMPILE=~/toolchain/bin/arm-linux-androideabi-
+  - export ARCH=arm
+  - export ARCH_MTK_PLATFORM=mt6735
+  - export KBUILD_BUILD_USER="ALGPHELLO"
+  - export KBUILD_BUILD_HOST="fujitsu"
+  - make mt6737t-grandpplteser-lineageos_defconfig
+  - make -j32
+  - KERNEL_DIR=$PWD
+  - ZIMAGE=$KERNEL_DIR/arch/arm/boot/*zImage*
+
+after_success:
+  - cd $KERNEL_DIR
+  - curl --upload-file arch/arm/boot/zImage https://transfer.sh/mt6737t-grandpplte-zImage
+
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key: "$GIT_OAUTH_TOKEN_TB"
+  file_glob: true
+  file: $KERNEL_DIR/arch/arm/boot/*Image*
+  on:
+    tags: false
+    repo: algphello/android_kernel_samsung_grandpplteser-mod
+    branch: master
+
+branches:
+  except:
+    - /^(?i:untagged)-.*$/
