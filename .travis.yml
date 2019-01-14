@@ -35,7 +35,7 @@ deploy:
   on:
     tags: false
     repo: algphello/android_kernel_samsung_grandpplteser-mod
-    branch: master
+    branch: android-6
 
 branches:
   except:
